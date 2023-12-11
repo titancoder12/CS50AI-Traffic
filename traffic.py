@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
+# REMEMBER TO CHANGE BACK TO 43
 NUM_CATEGORIES = 43
 TEST_SIZE = 0.4
 
@@ -63,14 +64,15 @@ def load_data(data_dir):
     print(os.getcwd())
     images = []
     labels = []
-    for i in range(NUM_CATEGORIES - 1):
+    for i in range(NUM_CATEGORIES):
         print(i)
         os.chdir(str(i))
         #img_group = []
-        print(len(os.listdir(os.getcwd())))
+        #print(len(os.listdir(os.getcwd())))
         for file in os.listdir(os.getcwd()):
-            print(file)
-            img = cv2.imread(file)
+            full_path = os.path.join(os.getcwd(), file)
+            #print(full_path)
+            img = cv2.imread(full_path)
             img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
             #img_group.append(img)
             images.append(img)
@@ -88,18 +90,30 @@ def get_model():
     """
     model = tf.keras.models.Sequential([
         tf.keras.layers.Conv2D(
-            32, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+            64, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
         ),
 
         tf.keras.layers.MaxPooling2D(pool_size=(2,2)),
 
+        tf.keras.layers.Conv2D(
+            64, (3, 3), activation="relu", input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)
+        ),
+
         tf.keras.layers.Flatten(),
 
+        tf.keras.layers.Dense(256, activation="relu"),
+        tf.keras.layers.Dropout(0.3),
+
         tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dropout(0.3),
 
-        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dropout(0.3),
 
-        tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
+        tf.keras.layers.Dense(128, activation="relu"),
+        tf.keras.layers.Dropout(0.3),
+
+        tf.keras.layers.Dense(NUM_CATEGORIES, activation="relu")
     ])
     model.compile(
         optimizer = "adam",
