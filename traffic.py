@@ -17,13 +17,12 @@ TEST_SIZE = 0.4
 def main():
 
     # Check command-line arguments
-    print("1")
     if len(sys.argv) not in [2, 3]:
         sys.exit("Usage: python traffic.py data_directory [model.h5]")
-    print("2")
+
     # Get image arrays and labels for all image files
     images, labels = load_data(sys.argv[1])
-    print("3")
+
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
     x_train, x_test, y_train, y_test = train_test_split(
@@ -61,7 +60,6 @@ def load_data(data_dir):
     corresponding `images`.
     """
     os.chdir(data_dir)
-    print(os.getcwd())
     images = []
     labels = []
     for i in range(NUM_CATEGORIES):
@@ -72,7 +70,10 @@ def load_data(data_dir):
         for file in os.listdir(os.getcwd()):
             full_path = os.path.join(os.getcwd(), file)
             #print(full_path)
-            img = cv2.imread(full_path)
+            # Req: Use the OpenCV-Python module (cv2) to read each image as a numpy.ndarray 
+            #(a numpy multidimensional array). To pass these images into a neural network, 
+            # the images will need to be the same size, so be sure to resize each image to have width IMG_WIDTH and height IMG_HEIGHT.
+            img = cv2.imread(full_path) 
             img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
             #img_group.append(img)
             images.append(img)
@@ -97,16 +98,17 @@ def get_model():
 
         tf.keras.layers.Flatten(),
 
+        tf.keras.layers.Dense(128, activation="relu"),
         tf.keras.layers.Dense(64, activation="relu"),
         tf.keras.layers.Dense(64, activation="relu"),
         tf.keras.layers.Dense(64, activation="relu"),
-        tf.keras.layers.Dropout(0.1),
+        tf.keras.layers.Dropout(0.3),
 
         tf.keras.layers.Dense(NUM_CATEGORIES, activation="softmax")
     ])
     model.compile(
         optimizer = "adam",
-        loss = "categorical_focal_crossentropy",
+        loss = "categorical_crossentropy",
         metrics=["accuracy"],
     )
     return model
